@@ -1,4 +1,6 @@
-const image = document.getElementById('cover'),
+// <a>タグを取得する変数を追加 (この行を追加)
+const coverLink = document.getElementById('cover-link'), 
+    image = document.getElementById('cover'),
     title = document.getElementById('music-title'),
     artist = document.getElementById('music-artist'),
     currentTimeEl = document.getElementById('current-time'),
@@ -12,30 +14,33 @@ const image = document.getElementById('cover'),
 const music = new Audio();
 
 const songs = [
-    /* (曲を追加したい場合)
-    {
-        path: 'assets(曲番号.mp3)',
-        displayName: '曲名',
-        cover: 'assets/画像番号.jpg',
-        artist: '作者',
-    },*/ 
     {
         path: 'assets/1.mp3',
         displayName: 'Future',
         cover: 'assets/1.jpg',
         artist: 'NK',
+        xLink: "https://x.com/NEW_web3/status/1906053707986616361"
     },
-        {
+    {
         path: 'assets/2.mp3',
         displayName: 'Technology',
         cover: 'assets/2.jpg',
         artist: 'NK',
+        xLink: "https://x.com/NEW_web3/status/1918213979509538901"
     },
-        {
+    {
         path: 'assets/3.mp3',
         displayName: 'Sparkle',
         cover: 'assets/3.jpg',
         artist: 'NK',
+        xLink: "https://x.com/NEW_web3/status/1938296210894557586"
+    },
+    {
+        path: 'assets/4.mp3',
+        displayName: 'Feeling ',
+        cover: 'assets/4.jpg',
+        artist: 'NK',
+        xLink: "https://x.com/NEW_web3/status/1949532340289688052"
     },
 ];
 
@@ -61,7 +66,7 @@ function getCssVariable(variableName) {
 }
 
 
-const gradientAlpha = 0.8; 
+const gradientAlpha = 0.8;
 
 
 const rawGradientPatterns = [
@@ -76,9 +81,9 @@ const rawGradientPatterns = [
 ];
 
 let currentGradientIndex = 0;
-let gradientAnimationId; 
+let gradientAnimationId;
 let startTime = null;
-const durationPerStep = 5000; 
+const durationPerStep = 5000;
 
 function togglePlay() {
     if (isPlaying) {
@@ -108,7 +113,9 @@ function loadMusic(song) {
     music.src = song.path;
     title.textContent = song.displayName;
     artist.textContent = song.artist;
-    image.src = song.cover; 
+    image.src = song.cover;
+    // リンクを更新する処理 (この行を追加)
+    coverLink.href = song.xLink;
 }
 
 function changeMusic(direction) {
@@ -123,7 +130,11 @@ function updateProgressBar() {
     progress.style.width = `${progressPercent}%`;
 
     const formatTime = (time) => String(Math.floor(time)).padStart(2, '0');
-    durationEl.textContent = `${formatTime(duration / 60)}:${formatTime(duration % 60)}`;
+    
+    // durationがNaNでない場合のみ時間を表示
+    if (!isNaN(duration)) {
+        durationEl.textContent = `${formatTime(duration / 60)}:${formatTime(duration % 60)}`;
+    }
     currentTimeEl.textContent = `${formatTime(currentTime / 60)}:${formatTime(currentTime % 60)}`;
 }
 
@@ -133,15 +144,13 @@ function setProgressBar(e) {
     music.currentTime = (clickX / width) * music.duration;
 }
 
-// グラデーションアニメーションを開始する関数
 function startGradientAnimation() {
-    if (!gradientAnimationId) { 
-        startTime = null; 
+    if (!gradientAnimationId) {
+        startTime = null;
         gradientAnimationId = requestAnimationFrame(animateGradient);
     }
 }
 
-// グラデーションアニメーションを停止する関数
 function stopGradientAnimation() {
     if (gradientAnimationId) {
         cancelAnimationFrame(gradientAnimationId);
@@ -149,12 +158,11 @@ function stopGradientAnimation() {
     }
 }
 
-// グラデーションをアニメーションさせるメインループ
 function animateGradient(timestamp) {
     if (!startTime) startTime = timestamp;
     const elapsed = timestamp - startTime;
 
-  
+
     const totalProgress = elapsed / durationPerStep;
     const currentStepIndex = Math.floor(totalProgress);
     const progressInCurrentStep = totalProgress - currentStepIndex;
@@ -170,7 +178,7 @@ function animateGradient(timestamp) {
     const endColor1 = hexToRgb(nextPattern.colors[0]);
     const endColor2 = hexToRgb(nextPattern.colors[1]);
 
-  
+
     const interpolatedR1 = startColor1.r + (endColor1.r - startColor1.r) * progressInCurrentStep;
     const interpolatedG1 = startColor1.g + (endColor1.g - startColor1.g) * progressInCurrentStep;
     const interpolatedB1 = startColor1.b + (endColor1.b - startColor1.b) * progressInCurrentStep;
@@ -192,11 +200,10 @@ function animateGradient(timestamp) {
 
     document.body.style.backgroundImage = `linear-gradient(${interpolatedAngle}deg, ${finalColor1}, ${finalColor2})`;
 
-    // アニメーション
-    if (isPlaying) { // 音楽が再生中であれば続ける
+    if (isPlaying) {
         gradientAnimationId = requestAnimationFrame(animateGradient);
     } else {
-        stopGradientAnimation(); // 音楽が停止したらアニメーションも停止
+        stopGradientAnimation();
     }
 }
 
@@ -210,4 +217,5 @@ playerProgress.addEventListener('click', setProgressBar);
 
 loadMusic(songs[musicIndex]);
 
-startGradientAnimation();
+// 最初はアニメーションを再生しないように変更
+stopGradientAnimation();
